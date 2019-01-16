@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT">
+  <meta name="keywords" content="Decision Tree,">
 
 
 
@@ -79,13 +79,18 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="Vainn">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta name="description" content="写在前面不写了 = w = 原理递归出口 当前节点样本属于同一类 该节点设置为叶节点   当前节点属性的集合为空，或者样本在各个属性上取值相同 设为叶节点，并取数量最多的类别作为该节点类别  样本集合为空 设为叶节点，但是这里将父节点中数量最多的类别设置为当前类别。     划分方式信息增益假设一个节点包含K类样本，如果按照某个属性进行划分，能够得到当前条件下的最好的分类，那么直观上可以选择该特征">
+<meta name="keywords" content="Decision Tree">
+<meta property="og:type" content="article">
+<meta property="og:title" content="决策树">
+<meta property="og:url" content="http://yoursite.com/2018/03/07/decision-tree/index.html">
 <meta property="og:site_name" content="Vainn">
+<meta property="og:description" content="写在前面不写了 = w = 原理递归出口 当前节点样本属于同一类 该节点设置为叶节点   当前节点属性的集合为空，或者样本在各个属性上取值相同 设为叶节点，并取数量最多的类别作为该节点类别  样本集合为空 设为叶节点，但是这里将父节点中数量最多的类别设置为当前类别。     划分方式信息增益假设一个节点包含K类样本，如果按照某个属性进行划分，能够得到当前条件下的最好的分类，那么直观上可以选择该特征">
 <meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-01-16T15:33:23.512Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Vainn">
+<meta name="twitter:title" content="决策树">
+<meta name="twitter:description" content="写在前面不写了 = w = 原理递归出口 当前节点样本属于同一类 该节点设置为叶节点   当前节点属性的集合为空，或者样本在各个属性上取值相同 设为叶节点，并取数量最多的类别作为该节点类别  样本集合为空 设为叶节点，但是这里将父节点中数量最多的类别设置为当前类别。     划分方式信息增益假设一个节点包含K类样本，如果按照某个属性进行划分，能够得到当前条件下的最好的分类，那么直观上可以选择该特征">
 
 
 
@@ -115,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/">
+  <link rel="canonical" href="http://yoursite.com/2018/03/07/decision-tree/">
 
 
 
 
 
-  <title>Vainn</title>
+  <title>决策树 | Vainn</title>
   
 
 
@@ -140,8 +145,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
@@ -244,311 +248,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/20/vae/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Vainn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Vainn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/04/20/vae/" itemprop="url">变分自编码器实践</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-04-20T23:22:17+08:00">
-                2018-04-20
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          0. 写在前面不写了
-1. 原理不讲了
-2. 实践数据集：The Olivetti faces datasetOlivetti faces是一个小型的数据集，包含400张人脸的灰度图像，图像大小为64x64x1像素。在该数据集训练较为简单，可以快速地在普通的笔记本GPU上完成训练。  
-
-mat格式
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/04/20/vae/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/09/raspberry-mxnet/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Vainn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Vainn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/03/09/raspberry-mxnet/" itemprop="url">树莓派编译MXNet</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-03-09T23:09:00+08:00">
-                2018-03-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          编译步骤0 . 安装依赖12sudo apt-get updatesudo apt-get -y install git cmake build-essential g++-4.8 c++-4.8 liblapack* libblas* libopencv*
-1 . 下载源码
-123git clon
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/03/09/raspberry-mxnet/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
 
   
 
@@ -578,9 +280,7 @@ mat格式
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/03/07/decision-tree/" itemprop="url">决策树</a></h1>
+          <h1 class="post-title" itemprop="name headline">决策树</h1>
         
 
         <div class="post-meta">
@@ -652,27 +352,46 @@ mat格式
       
 
       
-        
-          
-          写在前面不写了 = w =
-原理递归出口
-当前节点样本属于同一类 该节点设置为叶节点 
+        <h2 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h2><p>不写了 = w =</p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><h3 id="递归出口"><a href="#递归出口" class="headerlink" title="递归出口"></a>递归出口</h3><ol>
+<li><p><strong>当前节点样本属于同一类</strong><br> 该节点设置为叶节点 </p>
+</li>
+<li><p><strong>当前节点属性的集合为空，或者样本在各个属性上取值相同</strong><br> 设为叶节点，并取数量最多的类别作为该节点类别</p>
+</li>
+<li><p><strong>样本集合为空</strong><br> 设为叶节点，但是这里将父节点中数量最多的类别设置为当前类别。  </p>
+</li>
+</ol>
+<h3 id="划分方式"><a href="#划分方式" class="headerlink" title="划分方式"></a>划分方式</h3><h4 id="信息增益"><a href="#信息增益" class="headerlink" title="信息增益"></a>信息增益</h4><p>假设一个节点包含K类样本，如果按照某个属性进行划分，能够得到当前条件下的最好的分类，那么直观上可以选择该特征进行划分。<br>用<strong>信息增益</strong>来表示这一准则：</p>
+<p>设X为取有限个值的离散变量，其概率分布为：$P(X=x_i) = p_i, \quad i=1,2, …, n$<br>随机变量X的熵：  </p>
+<p>$$ H(X) = -\sum\limits_{i=1}^{n}p_i \log p_i \tag{1}$$  </p>
+<p>在某个节点上，对属性A进行划分。假设样本在属性A上有V个取值 $ {a^1, a^2, … , a^V}$ ，则该划分产生V个子节点，第v个子节点包含了在A上取值为 $ a^v $ 的样本，记为$D^v$。<br>定义<strong>信息增益(information gain)</strong>：  </p>
+<p>$$ Gain(D,A) = H(D) - H(D|A) \tag{2}$$</p>
+<p>$H(D)$ 为集合D的经验熵(empirical entropy),通过式(1)进行计算，概率$p_i$由数据估计得到。<br>$H(D|A)$ 为经验条件熵(empirical conditional entropy)，描述了给定A情况下随机变量D的熵对X的数学期望。条件熵定义如下： </p>
+<p>$$ H(Y|X) = \sum\limits_{i=1}^{n}p_iH(Y|X=x_i) \tag{3}$$  </p>
+<p>实际上等式(2)等同于：  </p>
+<p>$$ Gain(D,A) = H(D) - \sum\limits_{v=1}^{V} \frac{|D^v|}{|D|} H(D^v) \tag{4}$$</p>
+<p>有了对信息增益的描述，我们就可以计算按各个属性划分得到的信息增益，并比较他们的大小，选择信息增益最大的特征。  </p>
+<h4 id="根据信息增益划分的流程："><a href="#根据信息增益划分的流程：" class="headerlink" title="根据信息增益划分的流程："></a>根据信息增益划分的流程：</h4><p>1） 计算数据集D的经验熵$H(D)$</p>
+<p>$$H(D) = -\sum\limits_{k=1}^{K}\frac{|C_k|}{|D|} \log_2 \frac{|C_k|}{|D|} $$</p>
+<p>2） 计算特征A对数据集D的经验条件熵H(D|A) </p>
+<p>$$<br>H(D|A) = -\sum\limits_{v=1}^{V}\frac{|D_i|}{|D|} \sum\limits_{k=1}{K}\frac{|D_{vk}|}{|D_i|}\log_2 \frac{|D_{ik}|}{|D_i|}<br>$$</p>
+<p>3） 计算信息增益</p>
+<p>$$ Gain(D,A) = H(D) - H(D|A)$$ </p>
+<p>4） 选择下一个属性，回到步骤2。若完成所有属性上的信息增益计算，则执行5。<br>5） 比较信息增益，并选取最大值对应的属性，进行划分。</p>
+<h4 id="信息增益比"><a href="#信息增益比" class="headerlink" title="信息增益比"></a>信息增益比</h4><p>直接使用信息增益进行选择，会偏向于选取那些取值可能较多的属性。<br>可以使用<strong>信息增益比(gain ratio)</strong>作为选择依据：  </p>
+<p>$$<br>Gain_r(D,A) = \frac{Gain(D,A)}{H_A(D)} \tag{5}<br>$$</p>
+<p>式中$H_A(D)$为数据集D在属性A上的熵：  </p>
+<p>$$<br>H_A(D) = -\sum\limits_{v=1}^{V} \frac{|D^v|}{|D|} \log_2 \frac{|D^v|}{|D|}<br>$$</p>
+<p>然而，信息增益比对取值可能较少的属性产生偏好。</p>
+<h4 id="C-4-5算法的启发式划分方式"><a href="#C-4-5算法的启发式划分方式" class="headerlink" title="C 4.5算法的启发式划分方式"></a>C 4.5算法的启发式划分方式</h4><p>先从候选属性中找出信息增益高于平均水平的属性，再选择增益率最高的。</p>
+<h4 id="基尼指数"><a href="#基尼指数" class="headerlink" title="基尼指数"></a>基尼指数</h4><p>CART算法使用<strong>基尼指数(Gini index)</strong>来选择划分属性。  </p>
+<p>使用<strong>基尼值</strong>来度量数据集D纯度:  </p>
+<p>$$<br>Gini(D) = \sum\limits_{k=1}^{K} \sum\limits_{k^{‘} \ne k} p_k p_{k^{‘}} = 1- \sum\limits_{k=1}^{K}p_k^2 \tag{6}<br>$$</p>
+<p>式(6)描述的是，随意从数据集中抽取两个样本，两者不同的概率。Gini值越小，样本纯度越高。</p>
+<p>属性A的基尼指数：  </p>
+<p>$$<br>Gini_index(D,A) = \sum\limits_{v=1}^{V}Gini(D^v)<br>$$</p>
+<p>CART选取基尼指数最小的属性作为划分属性。</p>
 
-当前节点属性的集合为空，或者样本在各个属性上取值相同 设为叶节点，并取数量最多的类别作为该节点类别
-
-样本集合为空 设为叶节点，但是这里将父节点中数量最多的类别设置为当前类别。  
-
-
-划分方式信息增益假设一个
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/03/07/decision-tree/#more" rel="contents">
-              Read more &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
       
     </div>
     
@@ -684,166 +403,61 @@ mat格式
     
 
     
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:</strong>
+    Vainn
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link:</strong>
+    <a href="http://yoursite.com/2018/03/07/decision-tree/" title="决策树">http://yoursite.com/2018/03/07/decision-tree/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice: </strong>
+    All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> unless stating additionally.
+  </li>
+</ul>
+
+      </div>
+    
 
     <footer class="post-footer">
       
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/07/svm/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Vainn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Vainn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/03/07/svm/" itemprop="url">Support Vector Machine</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-03-07T20:54:16+08:00">
-                2018-03-07
-              </time>
-            
-
-            
-
-            
-          </span>
-
+        <div class="post-tags">
           
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
-                    <span itemprop="name">Machine Learning</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
+            <a href="/tags/Decision-Tree/" rel="tag"># Decision Tree</a>
           
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
         </div>
-      </header>
-    
+      
 
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
+      
       
       
 
       
-        
-          
-          写在前面作者很懒，什么也没有留下。
-简介支持向量机（support vector machine，简称SVM），是可以用来处理分类和回归任务的经典机器学习算法。SVM Classifier(SVC)的基本思想是寻找一个合适的超平面，来对数据进行划分。一个合理选择是能够以最大间隔把两个类分开的超平面。
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/03/07/svm/#more" rel="contents">
-              Read more &raquo;
-            </a>
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/07/svm/" rel="next" title="Support Vector Machine">
+                <i class="fa fa-chevron-left"></i> Support Vector Machine
+              </a>
+            
           </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
 
-    
+          <span class="post-nav-divider"></span>
 
-    
-
-    
-
-    <footer class="post-footer">
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/09/raspberry-mxnet/" rel="prev" title="树莓派编译MXNet">
+                树莓派编译MXNet <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
       
 
       
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -853,10 +467,11 @@ mat格式
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -864,6 +479,10 @@ mat格式
 
 
           
+
+  
+
+
 
         </div>
         
@@ -884,8 +503,17 @@ mat格式
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
@@ -975,6 +603,22 @@ mat格式
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#写在前面"><span class="nav-number">1.</span> <span class="nav-text">写在前面</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原理"><span class="nav-number">2.</span> <span class="nav-text">原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#递归出口"><span class="nav-number">2.1.</span> <span class="nav-text">递归出口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#划分方式"><span class="nav-number">2.2.</span> <span class="nav-text">划分方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#信息增益"><span class="nav-number">2.2.1.</span> <span class="nav-text">信息增益</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#根据信息增益划分的流程："><span class="nav-number">2.2.2.</span> <span class="nav-text">根据信息增益划分的流程：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#信息增益比"><span class="nav-number">2.2.3.</span> <span class="nav-text">信息增益比</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#C-4-5算法的启发式划分方式"><span class="nav-number">2.2.4.</span> <span class="nav-text">C 4.5算法的启发式划分方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基尼指数"><span class="nav-number">2.2.5.</span> <span class="nav-text">基尼指数</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -1108,6 +752,10 @@ mat格式
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 

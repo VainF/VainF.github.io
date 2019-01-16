@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Variational AutoEncoder,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="0. 写在前面不写了 1. 原理不讲了 2. 实践数据集：The Olivetti faces datasetOlivetti faces是一个小型的数据集，包含400张人脸的灰度图像，图像大小为64x64x1像素。在该数据集训练较为简单，可以快速地在普通的笔记本GPU上完成训练。    mat格式数据集链接，下载得到的.mat文件可以用scipy读取。 数据集处理读取到的数据每一列为一张人脸图像">
+<meta name="keywords" content="Variational AutoEncoder">
+<meta property="og:type" content="article">
+<meta property="og:title" content="变分自编码器实践">
+<meta property="og:url" content="http://yoursite.com/2019/01/16/vae/index.html">
+<meta property="og:site_name" content="Vainn">
+<meta property="og:description" content="0. 写在前面不写了 1. 原理不讲了 2. 实践数据集：The Olivetti faces datasetOlivetti faces是一个小型的数据集，包含400张人脸的灰度图像，图像大小为64x64x1像素。在该数据集训练较为简单，可以快速地在普通的笔记本GPU上完成训练。    mat格式数据集链接，下载得到的.mat文件可以用scipy读取。 数据集处理读取到的数据每一列为一张人脸图像">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/assets/imgs/olivetti-face-sample.jpg">
+<meta property="og:image" content="http://yoursite.com/assets/imgs/vae-generate.png">
+<meta property="og:updated_time" content="2019-01-16T15:27:02.382Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="变分自编码器实践">
+<meta name="twitter:description" content="0. 写在前面不写了 1. 原理不讲了 2. 实践数据集：The Olivetti faces datasetOlivetti faces是一个小型的数据集，包含400张人脸的灰度图像，图像大小为64x64x1像素。在该数据集训练较为简单，可以快速地在普通的笔记本GPU上完成训练。    mat格式数据集链接，下载得到的.mat文件可以用scipy读取。 数据集处理读取到的数据每一列为一张人脸图像">
+<meta name="twitter:image" content="http://yoursite.com/assets/imgs/olivetti-face-sample.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/01/16/vae/">
+
+
+
+
+
+  <title>变分自编码器实践 | Vainn</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta custom-logo">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Vainn</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/01/16/vae/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Vainn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Vainn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">变分自编码器实践</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-01-16T23:22:17+08:00">
+                2019-01-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/Machine-Learning/" itemprop="url" rel="index">
+                    <span itemprop="name">Machine Learning</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="0-写在前面"><a href="#0-写在前面" class="headerlink" title="0. 写在前面"></a>0. 写在前面</h2><p>不写了</p>
+<h2 id="1-原理"><a href="#1-原理" class="headerlink" title="1. 原理"></a>1. 原理</h2><p>不讲了</p>
+<h2 id="2-实践"><a href="#2-实践" class="headerlink" title="2. 实践"></a>2. 实践</h2><h3 id="数据集：The-Olivetti-faces-dataset"><a href="#数据集：The-Olivetti-faces-dataset" class="headerlink" title="数据集：The Olivetti faces dataset"></a>数据集：The Olivetti faces dataset</h3><p>Olivetti faces是一个小型的数据集，包含400张人脸的灰度图像，图像大小为64x64x1像素。在该数据集训练较为简单，可以快速地在普通的笔记本GPU上完成训练。  </p>
+<p><img src="/assets/imgs/olivetti-face-sample.jpg" alt="olivetti-face-sample"></p>
+<p>mat格式数据集<a href="https://figshare.com/articles/olivettifaces_mat/3829989" target="_blank" rel="noopener">链接</a>，下载得到的.mat文件可以用scipy读取。</p>
+<h3 id="数据集处理"><a href="#数据集处理" class="headerlink" title="数据集处理"></a>数据集处理</h3><p>读取到的数据每一列为一张人脸图像，共400列。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> scipy.io</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">import</span> os, sys</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">data = scipy.io.loadmat(<span class="string">"./olivettifaces.mat"</span>)</span><br><span class="line">face_images = np.array(data[<span class="string">'faces'</span>])/<span class="number">255</span></span><br><span class="line">face_images = face_images.transpose(<span class="number">1</span>,<span class="number">0</span>).reshape(<span class="number">-1</span>,<span class="number">64</span>,<span class="number">64</span>).transpose(<span class="number">0</span>,<span class="number">2</span>,<span class="number">1</span>)</span><br><span class="line">print(face_images.shape)</span><br><span class="line">plt.imshow(face_images[<span class="number">1</span>],cmap=<span class="string">'gray'</span>)</span><br></pre></td></tr></table></figure></p>
+<h3 id="Encoder"><a href="#Encoder" class="headerlink" title="Encoder"></a>Encoder</h3><p>Encoder用于编码输入数据，输出是对应的隐含表示的分布，当假设为高斯分布时，encoder输出高斯分布的期望和log方差，并从该分布中采样得到一个z (latent code)，z应当能够重建回与输入相似的样本。以下代码中mn表示期望（均值），sd表示方差的log值，取对数的原因可以参考<a href="https://stats.stackexchange.com/questions/241187/calculating-standard-deviation-after-log-transformation" target="_blank" rel="noopener">链接</a>，不过sd直接表示成方差的影响不大。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">n_latent = <span class="number">50</span></span><br><span class="line">batch_size = <span class="number">16</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">vae_encoder</span><span class="params">(X)</span>:</span></span><br><span class="line">    <span class="keyword">with</span> tf.variable_scope(<span class="string">"encoder"</span>,reuse=<span class="keyword">None</span>):</span><br><span class="line">        print(<span class="string">"Encoder:"</span>)</span><br><span class="line">        print(X.shape, <span class="string">"INPUT"</span>)</span><br><span class="line">        x = tf.layers.conv2d(X,filters=<span class="number">32</span>,kernel_size=<span class="number">9</span>,strides=<span class="number">2</span>,padding=<span class="string">"SAME"</span>,activation=tf.nn.relu) </span><br><span class="line">        print(x.shape, <span class="string">" 1"</span>)</span><br><span class="line">        </span><br><span class="line">        x = tf.layers.conv2d(x,filters=<span class="number">64</span>,kernel_size=<span class="number">5</span>,strides=<span class="number">2</span>,padding=<span class="string">"SAME"</span>,activation=tf.nn.relu)</span><br><span class="line">        print(x.shape, <span class="string">" 2"</span>)</span><br><span class="line">        </span><br><span class="line">        x = tf.layers.conv2d(x,filters=<span class="number">128</span>,kernel_size=<span class="number">5</span>,strides=<span class="number">2</span>,padding=<span class="string">"SAME"</span>,activation=tf.nn.relu)</span><br><span class="line">        print(x.shape, <span class="string">" 3"</span>)</span><br><span class="line">        </span><br><span class="line">        x = tf.layers.conv2d(x,filters=<span class="number">32</span>,kernel_size=<span class="number">5</span>,strides=<span class="number">2</span>,padding=<span class="string">"SAME"</span>,activation=tf.nn.relu)</span><br><span class="line">        print(x.shape, <span class="string">" 4"</span>)</span><br><span class="line">    </span><br><span class="line">        x = tf.contrib.layers.flatten(x)</span><br><span class="line">        </span><br><span class="line">        mn = tf.layers.dense(x, units=n_latent, activation=tf.nn.sigmoid)</span><br><span class="line">        sd = tf.layers.dense(x, units=n_latent, activation=tf.nn.sigmoid) <span class="comment"># log(sd) actually</span></span><br><span class="line"></span><br><span class="line">        epsilon = tf.random_normal(tf.stack([tf.shape(x)[<span class="number">0</span>],n_latent])) <span class="comment"># shape: (batch_size, latent code size)</span></span><br><span class="line"></span><br><span class="line">        z = mn + tf.multiply(epsilon, tf.exp(sd)) <span class="comment"># mean + z * exp(log(sd))</span></span><br><span class="line">        print(z.shape)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> z, mn, sd</span><br></pre></td></tr></table></figure>
+<h3 id="Decoder"><a href="#Decoder" class="headerlink" title="Decoder"></a>Decoder</h3><p>Decoder用于将隐含表示z重建到与输入相似的样本。简单的说，decoder从的z构建除了一张图像，该图像与encoder的输入是相似的。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">vae_decoder</span><span class="params">(z)</span>:</span></span><br><span class="line">    <span class="keyword">with</span> tf.variable_scope(<span class="string">"decoder"</span>,reuse=<span class="keyword">None</span>):</span><br><span class="line">        print(<span class="string">"Decoder:"</span>)</span><br><span class="line">        print(z.shape, <span class="string">" input z"</span>)</span><br><span class="line">        x = tf.layers.dense(z,units=<span class="number">4</span>*<span class="number">4</span>*<span class="number">32</span>,activation=tf.nn.relu,name=<span class="string">"decode_dense1"</span>)</span><br><span class="line">        print(x.shape, <span class="string">"fullyconnected 1"</span>)</span><br><span class="line">    </span><br><span class="line">        x = tf.reshape(x,[<span class="number">-1</span>,<span class="number">4</span>,<span class="number">4</span>,<span class="number">32</span>])</span><br><span class="line">        print(x.shape, <span class="string">" reshaped"</span>)</span><br><span class="line">        </span><br><span class="line">        x = tf.layers.conv2d_transpose(x, filters=<span class="number">32</span>,kernel_size=<span class="number">5</span>,strides=<span class="number">2</span>,padding=<span class="string">'SAME'</span>,activation=tf.nn.relu)</span><br><span class="line">        print(x.shape, <span class="string">" 4"</span>)</span><br><span class="line">        </span><br><span class="line">        x = tf.layers.conv2d_transpose(x, filters=<span class="number">64</span>,kernel_size=<span class="number">5</span>,strides=<span class="number">2</span>,padding=<span class="string">'SAME'</span>,activation=tf.nn.relu)</span><br><span class="line">        print(x.shape, <span class="string">" 3"</span>)</span><br><span class="line">        </span><br><span class="line">        x = tf.layers.conv2d_transpose(x, filters=<span class="number">32</span>,kernel_size=<span class="number">5</span>,strides=<span class="number">2</span>,padding=<span class="string">'SAME'</span>,activation=tf.nn.relu)</span><br><span class="line">        print(x.shape, <span class="string">" 2"</span>)</span><br><span class="line">        </span><br><span class="line">        x = tf.layers.conv2d_transpose(x, filters=<span class="number">1</span>,kernel_size=<span class="number">9</span>,strides=<span class="number">2</span>,padding=<span class="string">"SAME"</span>)</span><br><span class="line">        print(x.shape, <span class="string">" 1"</span>)</span><br><span class="line">        </span><br><span class="line">        img = tf.reshape(x,shape=[<span class="number">-1</span>,<span class="number">64</span>,<span class="number">64</span>,<span class="number">1</span>])</span><br><span class="line">        print(img.shape)</span><br><span class="line">        <span class="keyword">return</span> img</span><br></pre></td></tr></table></figure></p>
+<h3 id="构建网络"><a href="#构建网络" class="headerlink" title="构建网络"></a>构建网络</h3><p>用上述encoder和decoder组成完整的网络。这里再啰嗦一句，z是从期望为mn，方差为sd的正太分布中随机采样得到的，out为和输入相似的图像。整个网络的工作流程为：encoder将输入图像映射到一个正态分布，采样得到z，decoder将z重建回图像。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">img_width = <span class="number">64</span></span><br><span class="line">img_height = <span class="number">64</span></span><br><span class="line">tf.reset_default_graph()</span><br><span class="line"></span><br><span class="line">input_batch = tf.placeholder(dtype=tf.float32,shape=[<span class="keyword">None</span>,img_width,img_height,<span class="number">1</span>],name=<span class="string">"input_batch"</span>)</span><br><span class="line"></span><br><span class="line">z, mn, sd = vae_encoder(input_batch)</span><br><span class="line">out = vae_decoder(z)</span><br></pre></td></tr></table></figure></p>
+<h3 id="定义损失"><a href="#定义损失" class="headerlink" title="定义损失"></a>定义损失</h3><p>损失由两部分组成，img_loss为常见的MSE损失，衡量的是整体上输入与输出图像的相似程度。kl_loss描述的是encoder学习到的数据分布，与实际的分布之间的误差。这两项共同构成了网络的loss function，实际上该loss描述的是极大似然的下界，这里先暂时不详细叙述。（注意sd实际是方差的log）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">out_flat = tf.reshape(out, [<span class="number">-1</span>, <span class="number">64</span>*<span class="number">64</span>*<span class="number">1</span>])</span><br><span class="line">input_flat = tf.reshape(input_batch,[<span class="number">-1</span>,<span class="number">64</span>*<span class="number">64</span>*<span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">print(out.shape)</span><br><span class="line">print(input_batch.shape)</span><br><span class="line"></span><br><span class="line">img_loss = tf.reduce_sum(tf.squared_difference(out_flat,input_flat),<span class="number">1</span>)</span><br><span class="line">kl_loss = <span class="number">-0.5</span>*tf.reduce_sum(<span class="number">1</span>+sd-tf.square(mn)-tf.exp(sd),<span class="number">1</span>)</span><br><span class="line">loss = tf.reduce_mean(img_loss+kl_loss)</span><br><span class="line">optimizer = tf.train.AdamOptimizer(<span class="number">0.0005</span>).minimize(loss)</span><br></pre></td></tr></table></figure>
+<h3 id="从checkpoint恢复参数"><a href="#从checkpoint恢复参数" class="headerlink" title="从checkpoint恢复参数"></a>从checkpoint恢复参数</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> random</span><br><span class="line">total_steps = <span class="number">300000</span></span><br><span class="line">face_images = face_images.reshape([<span class="number">-1</span>,<span class="number">64</span>,<span class="number">64</span>,<span class="number">1</span>])</span><br><span class="line">sess = tf.Session()</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    os.mkdir(<span class="string">'checkpoints-2'</span>)</span><br><span class="line"><span class="keyword">except</span>:</span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">saver = tf.train.Saver()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">ckpt = tf.train.get_checkpoint_state(<span class="string">'checkpoints-2'</span>)</span><br><span class="line"><span class="keyword">if</span> ckpt <span class="keyword">and</span> ckpt.model_checkpoint_path:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        saver.restore(sess, ckpt.model_checkpoint_path)</span><br><span class="line">        print(<span class="string">"Model restored from checkpoints"</span>)</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        print(<span class="string">"Failed!"</span>)</span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+<h3 id="训练"><a href="#训练" class="headerlink" title="训练"></a>训练</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">print(<span class="string">"Training...."</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(total_steps):</span><br><span class="line">    batch_idx = random.sample(range(len(face_images)),batch_size)</span><br><span class="line">    batch = face_images[batch_idx]</span><br><span class="line">    </span><br><span class="line">    sess.run(optimizer,feed_dict=&#123;input_batch: batch&#125;)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> i%<span class="number">200</span>:</span><br><span class="line">        print(<span class="string">"[INFO]"</span>)</span><br><span class="line">        total_ls, decoded, img_ls, kl_ls, nean, div = sess.run([loss,out,img_loss,kl_loss,mn,sd],</span><br><span class="line">                                                           feed_dict=&#123;input_batch:batch&#125;)</span><br><span class="line">        </span><br><span class="line">        fig = plt.figure()</span><br><span class="line">        fig.add_subplot(<span class="number">121</span>)</span><br><span class="line">        plt.imshow(batch[<span class="number">0</span>].reshape(<span class="number">64</span>,<span class="number">64</span>),cmap=<span class="string">'gray'</span>)</span><br><span class="line">        <span class="comment">#plt.show()</span></span><br><span class="line">        fig.add_subplot(<span class="number">122</span>)</span><br><span class="line">        dec = np.array(decoded[<span class="number">0</span>])</span><br><span class="line">        dec = np.where(dec&lt;<span class="number">1</span>, dec, <span class="number">1</span>)</span><br><span class="line">        dec = np.where(dec&gt;<span class="number">0</span>, dec, <span class="number">0</span>)</span><br><span class="line">        plt.imshow(dec.reshape(<span class="number">64</span>,<span class="number">64</span>),cmap=<span class="string">'gray'</span>)</span><br><span class="line">        plt.show()</span><br><span class="line">        print(<span class="string">"[step %d] loss = %f, img_loss = %f, kl_loss=%f"</span> % (i,total_ls,np.mean(img_ls),np.mean(kl_ls)))</span><br><span class="line">        saver.save(sess,<span class="string">'checkpoints-2/model.ckpt'</span>,global_step=i)</span><br></pre></td></tr></table></figure>
+<h3 id="生成人脸图像"><a href="#生成人脸图像" class="headerlink" title="生成人脸图像"></a>生成人脸图像</h3><p>从正态分布中随机采样得到z，通过decoder生成新的人脸图像！<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">randoms = np.array([np.random.normal(<span class="number">0</span>, <span class="number">1</span>, n_latent) <span class="keyword">for</span> _ <span class="keyword">in</span> range(batch_size)])</span><br><span class="line">print(randoms.shape)</span><br><span class="line">decoded = sess.run(out, feed_dict = &#123;z: randoms&#125;)</span><br><span class="line">fig = plt.figure(figsize=(<span class="number">30</span>,<span class="number">30</span>))</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">4</span>):    </span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> range(<span class="number">4</span>):</span><br><span class="line">        fig.add_subplot(<span class="number">4</span>,<span class="number">4</span>,i*<span class="number">4</span>+j+<span class="number">1</span>)</span><br><span class="line">        dec = np.array(decoded[i*<span class="number">4</span>+j])</span><br><span class="line">        dec = np.where(dec&lt;<span class="number">1</span>, dec, <span class="number">1</span>)</span><br><span class="line">        dec = np.where(dec&gt;<span class="number">0</span>, dec, <span class="number">0</span>)</span><br><span class="line">        plt.imshow(dec.reshape(<span class="number">64</span>,<span class="number">64</span>),cmap=<span class="string">'gray'</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure></p>
+<p><img src="/assets/imgs/vae-generate.png" alt="生成人脸"></p>
+<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>本文代码见<a href="https://github.com/VainF/vae-faces" target="_blank" rel="noopener">repo</a></p>
+<h3 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h3><p>[1] <a href="https://arxiv.org/abs/1312.6114" target="_blank" rel="noopener">Auto-Encoding Variational Bayes. Diederik P Kingma, Max Welling. 2013</a><br>[2] <a href="https://jaan.io/what-is-variational-autoencoder-vae-tutorial/" target="_blank" rel="noopener">VAE tutorial</a><br>[3] <a href="https://stats.stackexchange.com/questions/241187/calculating-standard-deviation-after-log-transformation" target="_blank" rel="noopener">log transformation - stackexchange</a><br>[4] <a href="https://zhuanlan.zhihu.com/p/25401928" target="_blank" rel="noopener">知乎-变分自编码器（VAEs)</a>  不想看英文的朋友可以参考一下这个~</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>Post author:</strong>
+    Vainn
+  </li>
+  <li class="post-copyright-link">
+    <strong>Post link:</strong>
+    <a href="http://yoursite.com/2019/01/16/vae/" title="变分自编码器实践">http://yoursite.com/2019/01/16/vae/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice: </strong>
+    All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> unless stating additionally.
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Variational-AutoEncoder/" rel="tag"># Variational AutoEncoder</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/01/16/raspberry-mxnet/" rel="next" title="树莓派编译MXNet">
+                <i class="fa fa-chevron-left"></i> 树莓派编译MXNet
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/01/16/decision-tree/" rel="prev" title="decision-tree">
+                decision-tree <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Vainn</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/VainF" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:fgfvain97 at zju.edu.cn" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://horseee.github.io/" title="Horseee" target="_blank">Horseee</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0-写在前面"><span class="nav-number">1.</span> <span class="nav-text">0. 写在前面</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-原理"><span class="nav-number">2.</span> <span class="nav-text">1. 原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-实践"><span class="nav-number">3.</span> <span class="nav-text">2. 实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#数据集：The-Olivetti-faces-dataset"><span class="nav-number">3.1.</span> <span class="nav-text">数据集：The Olivetti faces dataset</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据集处理"><span class="nav-number">3.2.</span> <span class="nav-text">数据集处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Encoder"><span class="nav-number">3.3.</span> <span class="nav-text">Encoder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Decoder"><span class="nav-number">3.4.</span> <span class="nav-text">Decoder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#构建网络"><span class="nav-number">3.5.</span> <span class="nav-text">构建网络</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定义损失"><span class="nav-number">3.6.</span> <span class="nav-text">定义损失</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#从checkpoint恢复参数"><span class="nav-number">3.7.</span> <span class="nav-text">从checkpoint恢复参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#训练"><span class="nav-number">3.8.</span> <span class="nav-text">训练</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生成人脸图像"><span class="nav-number">3.9.</span> <span class="nav-text">生成人脸图像</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#最后"><span class="nav-number">3.10.</span> <span class="nav-text">最后</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reference"><span class="nav-number">3.11.</span> <span class="nav-text">Reference</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Vainn</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

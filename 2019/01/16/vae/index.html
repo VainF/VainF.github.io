@@ -87,13 +87,13 @@
 <meta property="og:site_name" content="Vainn">
 <meta property="og:description" content="0. 写在前面不写了 1. 原理不讲了 2. 实践数据集：The Olivetti faces datasetOlivetti faces是一个小型的数据集，包含400张人脸的灰度图像，图像大小为64x64x1像素。在该数据集训练较为简单，可以快速地在普通的笔记本GPU上完成训练。    mat格式数据集链接，下载得到的.mat文件可以用scipy读取。 数据集处理读取到的数据每一列为一张人脸图像">
 <meta property="og:locale" content="default">
-<meta property="og:image" content="http://yoursite.com/assets/imgs/olivetti-face-sample.jpg">
+<meta property="og:image" content="http://yoursite.com/post_images/olivetti-face-sample.jpg">
 <meta property="og:image" content="http://yoursite.com/assets/imgs/vae-generate.png">
-<meta property="og:updated_time" content="2019-01-16T15:27:02.382Z">
+<meta property="og:updated_time" content="2019-01-16T15:31:36.010Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="变分自编码器实践">
 <meta name="twitter:description" content="0. 写在前面不写了 1. 原理不讲了 2. 实践数据集：The Olivetti faces datasetOlivetti faces是一个小型的数据集，包含400张人脸的灰度图像，图像大小为64x64x1像素。在该数据集训练较为简单，可以快速地在普通的笔记本GPU上完成训练。    mat格式数据集链接，下载得到的.mat文件可以用scipy读取。 数据集处理读取到的数据每一列为一张人脸图像">
-<meta name="twitter:image" content="http://yoursite.com/assets/imgs/olivetti-face-sample.jpg">
+<meta name="twitter:image" content="http://yoursite.com/post_images/olivetti-face-sample.jpg">
 
 
 
@@ -358,7 +358,7 @@
         <h2 id="0-写在前面"><a href="#0-写在前面" class="headerlink" title="0. 写在前面"></a>0. 写在前面</h2><p>不写了</p>
 <h2 id="1-原理"><a href="#1-原理" class="headerlink" title="1. 原理"></a>1. 原理</h2><p>不讲了</p>
 <h2 id="2-实践"><a href="#2-实践" class="headerlink" title="2. 实践"></a>2. 实践</h2><h3 id="数据集：The-Olivetti-faces-dataset"><a href="#数据集：The-Olivetti-faces-dataset" class="headerlink" title="数据集：The Olivetti faces dataset"></a>数据集：The Olivetti faces dataset</h3><p>Olivetti faces是一个小型的数据集，包含400张人脸的灰度图像，图像大小为64x64x1像素。在该数据集训练较为简单，可以快速地在普通的笔记本GPU上完成训练。  </p>
-<p><img src="/assets/imgs/olivetti-face-sample.jpg" alt="olivetti-face-sample"></p>
+<p><img src="/post_images/olivetti-face-sample.jpg" alt="olivetti-face-sample"></p>
 <p>mat格式数据集<a href="https://figshare.com/articles/olivettifaces_mat/3829989" target="_blank" rel="noopener">链接</a>，下载得到的.mat文件可以用scipy读取。</p>
 <h3 id="数据集处理"><a href="#数据集处理" class="headerlink" title="数据集处理"></a>数据集处理</h3><p>读取到的数据每一列为一张人脸图像，共400列。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> scipy.io</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">import</span> os, sys</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">data = scipy.io.loadmat(<span class="string">"./olivettifaces.mat"</span>)</span><br><span class="line">face_images = np.array(data[<span class="string">'faces'</span>])/<span class="number">255</span></span><br><span class="line">face_images = face_images.transpose(<span class="number">1</span>,<span class="number">0</span>).reshape(<span class="number">-1</span>,<span class="number">64</span>,<span class="number">64</span>).transpose(<span class="number">0</span>,<span class="number">2</span>,<span class="number">1</span>)</span><br><span class="line">print(face_images.shape)</span><br><span class="line">plt.imshow(face_images[<span class="number">1</span>],cmap=<span class="string">'gray'</span>)</span><br></pre></td></tr></table></figure></p>
 <h3 id="Encoder"><a href="#Encoder" class="headerlink" title="Encoder"></a>Encoder</h3><p>Encoder用于编码输入数据，输出是对应的隐含表示的分布，当假设为高斯分布时，encoder输出高斯分布的期望和log方差，并从该分布中采样得到一个z (latent code)，z应当能够重建回与输入相似的样本。以下代码中mn表示期望（均值），sd表示方差的log值，取对数的原因可以参考<a href="https://stats.stackexchange.com/questions/241187/calculating-standard-deviation-after-log-transformation" target="_blank" rel="noopener">链接</a>，不过sd直接表示成方差的影响不大。</p>
@@ -431,8 +431,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/01/16/decision-tree/" rel="prev" title="decision-tree">
-                decision-tree <i class="fa fa-chevron-right"></i>
+              <a href="/2019/01/16/decision-tree/" rel="prev" title="决策树">
+                决策树 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>

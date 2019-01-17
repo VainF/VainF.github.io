@@ -88,7 +88,7 @@
 <meta property="og:description" content="写在前面作者很懒，什么也没有留下。 简介支持向量机（support vector machine，简称SVM），是可以用来处理分类和回归任务的经典机器学习算法。SVM Classifier(SVC)的基本思想是寻找一个合适的超平面，来对数据进行划分。一个合理选择是能够以最大间隔把两个类分开的超平面。简单的说，在分类任务中，支持向量机寻找一个划分方式，使得两个类别间隔最远。   原理 如何寻找最优平">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Svm_max_sep_hyperplane_with_margin.png/440px-Svm_max_sep_hyperplane_with_margin.png">
-<meta property="og:updated_time" content="2019-01-16T15:33:45.287Z">
+<meta property="og:updated_time" content="2019-01-17T17:34:05.712Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Support Vector Machine">
 <meta name="twitter:description" content="写在前面作者很懒，什么也没有留下。 简介支持向量机（support vector machine，简称SVM），是可以用来处理分类和回归任务的经典机器学习算法。SVM Classifier(SVC)的基本思想是寻找一个合适的超平面，来对数据进行划分。一个合理选择是能够以最大间隔把两个类分开的超平面。简单的说，在分类任务中，支持向量机寻找一个划分方式，使得两个类别间隔最远。   原理 如何寻找最优平">
@@ -399,7 +399,7 @@
 <p>$$ \max\limits_{\alpha, \beta: \alpha_i \ge 0}\theta_{dual}(\alpha, \beta) = \max\limits_{\alpha, \beta: \alpha_i \ge 0} \min\limits_{w}L(w, \alpha, \beta) \tag{6}$$</p>
 <p>问题(6)与问题(3)关系如下，不等式右边为我们起初需要解决的问题(3):</p>
 <p>$$<br>\begin{align}<br>dual^* = \max\limits_{\alpha, \beta: \alpha_i \ge 0} \min\limits_{w}L(w, \alpha, \beta) \le \min\limits_{w} \max\limits_{\alpha,\beta:\alpha_i \ge 0} L(w,\alpha,\beta) = primal^\star<br>\end{align}<br>$$</p>
-<p>当$ \alpha, \beta, w $满足KKT条件时，不等式取等号，即 $dual^<em> = primal^</em>$ ，此时可以通过求解对偶问题，来得到原问题的解。</p>
+<p>当$ \alpha, \beta, w $满足KKT条件时，不等式取等号，即 $ dual^\star = primal^\star $ ，此时可以通过求解对偶问题，来得到原问题的解。</p>
 <p><br></p>
 <h4 id="K-K-T条件"><a href="#K-K-T条件" class="headerlink" title="K-K-T条件"></a>K-K-T条件</h4><p>KKT条件是优化问题取得最优解的充分必要条件<br>根据2.4的式(5): </p>
 <p>$$<br>\begin{align}<br>&amp; \theta_{primal}(w) = \max\limits_{\alpha,\beta:\alpha_i \ge 0} L(w,\alpha,\beta) \newline<br>&amp; \qquad \quad \; \,= \max\limits_{\alpha,\beta:\alpha_i \ge 0} f(w)+\sum\limits_{i=1}^{k}\alpha_ig_i(w)+\sum\limits_{i=1}^{l}\beta_ih_i(w)<br>\end{align}<br>$$</p>
